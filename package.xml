@@ -1,0 +1,19 @@
+<package format="2">
+  <name>detectron2_ros</name>    
+  <version>0.1.0</version>
+  <description>
+     ros wrapper for detectron2 detectors
+  </description>
+  <maintainer email="suchi@acin.tuwien.ac.at">Markus Suchi</maintainer>
+  <author>Ali Jamadi, Markus Suchi</author>
+  <license>BSD</license>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>object_detector_msgs</depend>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
+
+
+
