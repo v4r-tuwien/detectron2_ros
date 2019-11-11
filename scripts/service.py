@@ -14,6 +14,7 @@ from detectron2_ros.predictor import Detectron2Predictor
 from detectron2_ros.detectron2_ros import Detectron2Ros
 
 # Only used to get path to detectron2 package for default values
+import os
 import detectron2
 
 class Detectron2Service(object):
@@ -76,7 +77,7 @@ if __name__ == '__main__':
         '--config-file',
         dest='config_file',
         type=str,
-        default='/detectron2_repo/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml',
+        default=default_config_file,
         help='Path to detectron2 configuration file')
     parser.add_argument(
         '-o',
