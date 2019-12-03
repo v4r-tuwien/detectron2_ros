@@ -29,7 +29,7 @@ class Detectron2Service(object):
         try:
             detectron2ros = Detectron2Ros(self.detector)
             detector_message = detectron2ros.run_on_image(image)
-            return DetectronServiceResponse(detector_message)
+            return detectron2_service_serverResponse(detector_message)
         except CvBridgeError as e:
             rospy.logerr('%s: Error during callback:\%s', self.name, e)
 
