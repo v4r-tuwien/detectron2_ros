@@ -26,5 +26,7 @@ catkin_install_python(PROGRAMS
   scripts/service.py
   scripts/action_server.py
   scripts/action_client.py
+  scripts/detectron2_service.py
+  scripts/detectron2_service_client.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
