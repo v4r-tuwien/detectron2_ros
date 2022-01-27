@@ -5,7 +5,7 @@ This code provides ROS wrappers for detectron2 framework.
 ## Dependencies
 1. Install [detectron2](https://github.com/facebookresearch/detectron2). 
    Refer to the install information on their website.
-2. Install [object_detector_msgs](https://rgit.acin.tuwien.ac.at/msuchi/object_detector_msgs) into your catkin workspace.
+2. Install [object_detector_msgs](https://github.com/v4r-tuwien/object_detector_msgs) into your catkin workspace.
 3. Buld ROS packages and do not forget to source your setup.bash file
 
 ## Examples
