@@ -9,6 +9,17 @@ This code provides ROS wrappers for detectron2 framework.
 3. Buld ROS packages and do not forget to source your setup.bash file
 
 ## Examples
+### Docker:
+To start the serivice, run 
+
+```
+docker-compose up
+```
+
+This starts the docker container and runs the service. Make sure the parameters `ROS_IP` and `ROS_MASTER_URI` in the `docker-compose.yml` file are correct. 
+Calling the service [`/detectron2_service/start`](https://rgit.acin.tuwien.ac.at/msuchi/object_detector_msgs/-/blob/master/srv/start.srv) starts the detector. The detections can be read from the topic [`/detectron2_service/detections`](https://rgit.acin.tuwien.ac.at/msuchi/object_detector_msgs/-/blob/master/msg/Detections.msg). 
+Calling [`/detectron2_service/stop`](https://rgit.acin.tuwien.ac.at/msuchi/object_detector_msgs/-/blob/master/srv/stop.srv) stops the detector. 
+
 ### Service:
 Detections with Image subscription as input.
 ```
