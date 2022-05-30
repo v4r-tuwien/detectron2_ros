@@ -15,9 +15,9 @@ services:
       - "hsrb:10.0.0.143"
     environment:
       - ROS_MASTER_URI=http://hsrb:11311
-      - ROS_IP=10.0.0.232
+      - ROS_IP=10.0.0.182
       - DISPLAY
       - QT_X11_NO_MITSHM=1
-    command: bash -c "source catkin_build_ws/devel/setup.bash; rosrun detectron2_ros service.py -ct 0.05 -c /detectron2_repo/configs/Misc/panoptic_fpn_R_101_dconv_cascade_gn_3x.yaml -o MODEL.WEIGHTS detectron2://Misc/panoptic_fpn_R_101_dconv_cascade_gn_3x/139797668/model_final_be35db.pkl -t /hsrb/head_rgbd_sensor/rgb/image_raw -v"
+    command: bash -c "source catkin_build_ws/devel/setup.bash; rosrun detectron2_ros service.py -ct 0.35 -c /detectron2/configs/Misc/panoptic_fpn_R_101_dconv_cascade_gn_3x.yaml -o MODEL.WEIGHTS detectron2://Misc/panoptic_fpn_R_101_dconv_cascade_gn_3x/139797668/model_final_be35db.pkl -t /hsrb/head_rgbd_sensor/rgb/image_raw -v"
     stdin_open: true
     tty: true    

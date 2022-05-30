@@ -13,17 +13,17 @@ This code provides ROS wrappers for detectron2 framework.
 Detections with Image subscription as input.
 ```
 rosrun detectron2_ros service.py -ct 0.5 \
-       -c /detectron2_repo/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml \
+       -c /detectron2/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml \
        -o MODEL.WEIGHTS detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl \
        -t /camera/rgb/image_rect_color \
        -v 
-```  
+```
 **-ct**  confidence threshold of detections
 
 **-c**   config file for detectron2 model
 
 **-o**   options for detectron2 model (see their website for more infos)
- 
+
 **-t**   topic to listen for new image messages 
 
 **-v**   publish visualization on topic /detectron2_service/image
