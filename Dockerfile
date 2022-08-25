@@ -1,116 +1,73 @@
-FROM nvidia/cuda:11.3.1-devel-ubuntu20.04
-MAINTAINER Markus Suchi (suchi@acin.tuwien.ac.at)
+FROM nvidia/cuda:11.6.1-cudnn8-devel-ubuntu20.04
+MAINTAINER Christian Eder (eder@acin.tuwien.ac.at)
 
-ENV DEBIAN_FRONTEND noninteractive
+# setup timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# setup environment
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-# Linux package install
-RUN sed 's/main$/main universe/' -i /etc/apt/sources.list
+ENV ROS_DISTRO noetic
 
-RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated --fix-missing \
-      build-essential \
-      autoconf \
-      automake \
-      git \
-      wget \
-      usbutils \
-      unzip \
-      vim \
-      software-properties-common \
-      libxext-dev \
-      libxrender-dev \
-      libxslt1.1 \
-      libxtst-dev \
-      libgtk2.0-0 \
-      libcanberra-gtk-module \
-      tmux \
-      && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated curl lsb-release wget ca-certificates gnupg2
 
-# Fixes shared memory error in docker
-RUN echo "export QT_X11_NO_MITSHM=1" >> ~/.bashrc
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list
 
-# Python 3
+# setup keys
+RUN wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc -O - | apt-key add -
+
+# update
+RUN apt-get update 
+
+RUN apt-get install --no-install-recommends -y --allow-unauthenticated ros-noetic-desktop-full
+
+# install python3
+RUN apt-get install --no-install-recommends -y --allow-unauthenticated software-properties-common build-essential
 RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated \
      python3-dev \
      python3-numpy \
      python3-pip \
      && rm -rf /var/lib/apt/lists/*
 
-# Install detectron2 package dependencies
-RUN apt-get update && apt-get install -y \
-      libpng-dev libjpeg-dev python3-opencv ca-certificates \
-      python3-dev build-essential pkg-config git curl wget automake libtool && \
-  rm -rf /var/lib/apt/lists/*
-
-#RUN curl -fSsL -O https://bootstrap.pypa.io/pip/3.6/get-pip.py && \
-#                   python3 get-pip.py && \
-#                   rm get-pip.py
-
-# Install detectron2 python dependencies
-# See https://pytorch.org/ for other options if you use a different version of CUDA
-RUN pip3 install --user tensorboard cmake 
-RUN pip3 install torch==1.10 torchvision==0.11.1 --extra-index-url https://download.pytorch.org/whl/cu113
-RUN pip3 install detectron2==0.6 -f \
-  https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html
-RUN git clone https://github.com/facebookresearch/detectron2.git
-
-# ROS
-#RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-RUN echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list
-RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
-
-# install bootstrap tools
-RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated \
-      python3-rosinstall \
-      python3-rosinstall-generator \
-      python3-wstool \
-      python3-rosdep \
-      python3-vcstools \
-      && rm -rf /var/lib/apt/lists/*
-
-# bootstrap rosdep
-RUN rosdep init && \
-    rosdep update
-
 # catkin tools
 RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated \
      python3-catkin-tools \
      && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated \
-      ros-noetic-ros-core \
-      ros-noetic-libuvc-camera \
-      ros-noetic-image-view \
-      ros-noetic-cv-bridge \
-      ros-noetic-cv-camera \
-      ros-noetic-actionlib \
-      && rm -rf /var/lib/apt/lists/*
-
-# install python packages
-#RUN pip install --upgrade pip setuptools
-RUN pip3 install --upgrade rospkg catkin_pkg opencv-contrib-python empy
-RUN pip3 install pillow==6.1
-
 # for ros environments
 RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 
 # Prepare catkin build
-RUN mkdir -p ~/catkin_build_ws/src
+RUN mkdir -p ~/catkin_ws/src
 
-# ROS-opencv
-#RUN /bin/bash -c 'cd ~/catkin_build_ws/src; git clone -b noetic https://github.com/ros-perception/vision_opencv.git'
+# install git and tmux
+RUN apt-get update && apt-get install --no-install-recommends -y --allow-unauthenticated git tmux
 
-# Detector ROS messages
-RUN /bin/bash -c 'cd ~/catkin_build_ws/src; git clone https://github.com/v4r-tuwien/object_detector_msgs.git'
+ENV FORCE_CUDA="1"
+ENV TORCH_CUDA_ARCH_LIST="Maxwell;Maxwell+Tegra;Pascal;Volta;Turing"
 
-# Detectron ROS wrapper
-COPY . /root/catkin_build_ws/src/detectron2_ros/
+RUN pip3 install torch torchvision --pre --extra-index-url https://download.pytorch.org/whl/nightly/cu116
+
+RUN git clone https://github.com/facebookresearch/detectron2 /detectron2_repo
+RUN pip3 install -e /detectron2_repo
+
+RUN /bin/bash -c  'cd ~/catkin_ws/src; git clone https://github.com/v4r-tuwien/object_detector_msgs.git'
+RUN /bin/bash -c  'cd ~/catkin_ws/src; git clone https://github.com/v4r-tuwien/detectron2_ros.git'
+
 # Run catkin build
-RUN /bin/bash -c  '. /opt/ros/noetic/setup.bash; cd ~/catkin_build_ws; catkin config -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_INCLUDE_DIR=/usr/include/python3.6m -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.6m.so; catkin build'
+RUN /bin/bash -c  '. /opt/ros/noetic/setup.bash; cd ~/catkin_ws/; catkin build'
 
 # source the catkin workspace
-RUN echo "source ~/catkin_build_ws/devel/setup.bash" >> ~/.bashrc
+RUN echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+
+# Make share folder
+RUN mkdir -p ~/share
 
 WORKDIR /root
 
